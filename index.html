@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Read & Type - 10 Round Programme</title>
+  <title>Talking In Pictures - Reading Game</title>
   <style>
     body {
       font-family: sans-serif;
@@ -17,10 +17,6 @@
     }
     .controls {
       margin-bottom: 20px;
-    }
-    .toggle-speech, .toggle-errorless {
-      font-size: 14px;
-      margin-left: 10px;
     }
     .word-display .uppercase-word {
       font-size: 36px;
@@ -99,12 +95,8 @@
   </a>
 
   <div class="controls">
-    <label class="toggle-speech">
-      <input type="checkbox" id="speechToggle" checked /> Enable speech prompts
-    </label>
-    <label class="toggle-errorless">
-      <input type="checkbox" id="errorlessToggle" /> Errorless mode
-    </label>
+    <label><input type="checkbox" id="speechToggle" checked /> Enable speech</label>
+    <label style="margin-left: 20px;"><input type="checkbox" id="errorlessToggle" /> Errorless mode</label>
   </div>
 
   <div id="gameArea">
@@ -115,7 +107,7 @@
     <div class="initial-letter" id="initialLetter"></div>
     <img id="image" src="" alt="Word image" />
     <div class="prompt" id="prompt">&nbsp;</div>
-    <input type="text" id="answer" maxlength="12" autofocus autocomplete="off" />
+    <input type="text" id="answer" maxlength="20" autofocus autocomplete="off" />
     <div class="feedback" id="feedback"></div>
     <div class="symbol-output" id="symbol"></div>
     <div id="timerDisplay">Time this round: 0s</div>
@@ -127,6 +119,7 @@
     <button onclick="startNextRound()">Start Next Round</button>
   </div>
 
+  <!-- Script block continues -->
   <script>
     const fourLetterWords = ["frog", "milk", "ship", "book", "lamp", "star", "duck", "nest", "ball", "tree"];
     const fiveLetterWords = ["apple", "chair", "grape", "plant", "train", "snake", "cloud", "light", "brick", "smile"];
@@ -135,6 +128,11 @@
     const eightLetterWords = ["elephant", "sandwich", "umbrella", "dinosaur", "notebook", "hospital", "football", "building", "magazine", "airplane"];
     const nineLetterWords = ["chocolate", "pineapple", "volunteer", "nightmare", "storybook", "blueberry", "astronaut", "adventure", "campfire", "lighthouse"];
     const tenLetterWords = ["strawberry", "vegetables", "playground", "motorcycle", "backpacker", "watermelon", "newspaper", "telescope", "librarian", "toothbrush"];
+    const elevenLetterWords = ["playfulness", "multiverse", "volleyballs", "breathtaking", "sailboarding", "friendliest", "expressions", "magnificent", "photographs", "windbreaker"];
+    const twelveLetterWords = ["understanding", "grandparents", "championship", "relationship", "kindergarten", "astonishment", "extraordinar", "intelligentl", "mathematical", "adventurous"];
+    const thirteenLetterWords = ["accomplishing", "contribution", "transformation", "concentration", "determination", "exaggeration", "hallucination", "justification", "participation", "recommendatio"];
+    const fourteenLetterWords = ["unbelievablely", "congratulation", "responsibility", "representation", "acknowledgment", "communication", "interpretation", "investigation", "manufacturing", "qualification"];
+    const fifteenLetterWords = ["extraordinarily", "misunderstoodly", "confidentiality", "unquestionably", "institutionally", "accomplishments", "unpredictablity", "comprehensively", "disappointmently", "uncontrollably"];
 
     const imageEl = document.getElementById("image");
     const feedbackEl = document.getElementById("feedback");
@@ -274,19 +272,39 @@
       gameArea.style.display = 'block';
       congratsScreen.style.display = 'none';
 
-      if (round === 2) phase = "threeLetter", preload(["cat", "dog", "sun", "pen", "cup", "box", "man", "fan", "bag", "jam"], 'threeLetter');
-      else if (round === 3) phase = "fourLetter", preload(fourLetterWords, 'fourLetter');
-      else if (round === 4) phase = "fiveLetter", preload(fiveLetterWords, 'fiveLetter');
-      else if (round === 5) phase = "sixLetter", preload(sixLetterWords, 'sixLetter');
-      else if (round === 6) phase = "sevenLetter", preload(sevenLetterWords, 'sevenLetter');
-      else if (round === 7) phase = "eightLetter", preload(eightLetterWords, 'eightLetter');
-      else if (round === 8) phase = "nineLetter", preload(nineLetterWords, 'nineLetter');
-      else if (round === 9) phase = "tenLetter", preload(tenLetterWords, 'tenLetter');
-      else alert("🎉 Well done! You’ve finished all 10 rounds.");
+      const roundData = {
+        2: { phase: "threeLetter", words: ["cat", "dog", "sun", "pen", "cup", "box", "man", "fan", "bag", "jam"] },
+        3: { phase: "fourLetter", words: fourLetterWords },
+        4: { phase: "fiveLetter", words: fiveLetterWords },
+        5: { phase: "sixLetter", words: sixLetterWords },
+        6: { phase: "sevenLetter", words: sevenLetterWords },
+        7: { phase: "eightLetter", words: eightLetterWords },
+        8: { phase: "nineLetter", words: nineLetterWords },
+        9: { phase: "tenLetter", words: tenLetterWords },
+        10: { phase: "elevenLetter", words: elevenLetterWords },
+        11: { phase: "twelveLetter", words: twelveLetterWords },
+        12: { phase: "thirteenLetter", words: thirteenLetterWords },
+        13: { phase: "fourteenLetter", words: fourteenLetterWords },
+        14: { phase: "fifteenLetter", words: fifteenLetterWords },
+        15: { phase: "easyReview", words: fourLetterWords },
+        16: { phase: "mediumReview", words: sixLetterWords },
+        17: { phase: "hardReview", words: tenLetterWords },
+        18: { phase: "extremeReview", words: elevenLetterWords },
+        19: { phase: "finalChallenge", words: thirteenLetterWords },
+        20: { phase: "grandFinale", words: fifteenLetterWords },
+      };
+
+      if (roundData[round]) {
+        const { phase: newPhase, words } = roundData[round];
+        phase = newPhase;
+        preload(words, newPhase);
+      } else {
+        alert("🎉 Well done! You've completed all 20 rounds!");
+      }
     }
 
-    // Start with alphabet round (x2)
-    const alphabetRound = [..."abcdefghijklmnopqrstuvwxyz"].map((l, i) => ({
+    // Start with double alphabet round
+    const alphabetWords = [..."abcdefghijklmnopqrstuvwxyz"].map((l, i) => ({
       word: [
         "apple","ball","cat","dog","egg","fish","goat","hat","ice","juice",
         "kite","lion","moon","nest","orange","pig","queen","rain","sun","tree",
@@ -294,7 +312,7 @@
       ][i],
       letter: l
     }));
-    preload([...alphabetRound, ...alphabetRound].map(w => w.word), 'alphabet');
+    preload([...alphabetWords, ...alphabetWords].map(w => w.word), 'alphabet');
   </script>
 </body>
 </html>
