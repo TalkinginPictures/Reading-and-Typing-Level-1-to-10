@@ -2,317 +2,227 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Talking In Pictures - Reading Game</title>
+  <title>Talking In Pictures Reading Programme</title>
   <style>
     body {
       font-family: sans-serif;
-      background: #f4f9f9;
-      padding: 20px;
+      background: #f0f0f0;
       text-align: center;
+      padding: 20px;
     }
-    a.logo-link img {
-      width: 150px;
-      margin-bottom: 20px;
+    img {
+      max-height: 200px;
     }
-    .controls {
-      margin-bottom: 20px;
+    .hidden {
+      display: none;
     }
-    .word-display .uppercase-word {
-      font-size: 36px;
+    #initialLetter {
+      font-size: 72px;
       font-weight: bold;
+      margin: 10px 0;
     }
-    .word-display .lowercase-word {
-      font-size: 18px;
-      color: #666;
-      margin-bottom: 10px;
+    #symbolEl {
+      font-size: 48px;
+      margin-top: 10px;
     }
-    .initial-letter {
-      font-size: 80px;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-    .initial-letter.incorrect {
-      color: red;
-    }
-    #image {
-      width: 200px;
-      height: 200px;
-      margin-bottom: 10px;
-      object-fit: contain;
-      border: 2px solid #ccc;
-      background: white;
-    }
-    .prompt {
+    #feedbackEl {
       font-size: 20px;
-      margin-bottom: 10px;
+      color: green;
+    }
+    #summaryTable {
+      text-align: left;
+      margin: 0 auto;
+      max-width: 400px;
     }
     input[type="text"] {
       font-size: 24px;
       padding: 10px;
-      width: 120px;
-      text-align: center;
-      margin-bottom: 20px;
-    }
-    .feedback {
-      font-size: 20px;
-      margin-bottom: 10px;
-      height: 30px;
-    }
-    .symbol-output {
-      margin-top: 10px;
-      font-size: 64px;
-      height: 80px;
-    }
-    #congratsScreen {
-      display: none;
-    }
-    #summaryTable {
-      margin-top: 30px;
-      text-align: left;
-      display: inline-block;
-      background: #fff;
-      padding: 15px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-    }
-    #timerDisplay {
-      font-size: 18px;
-      color: #555;
-      margin-top: 10px;
     }
     button {
       font-size: 20px;
       padding: 10px 20px;
-      margin: 15px 10px;
-      cursor: pointer;
+      margin: 10px;
     }
   </style>
 </head>
 <body>
-  <a href="https://www.talkinginpictures.co.uk" class="logo-link" target="_blank">
-    <img src="https://www.talkinginpictures.co.uk/tip-logo.png" alt="Talking In Pictures Logo" />
-  </a>
 
-  <div class="controls">
-    <label><input type="checkbox" id="speechToggle" checked /> Enable speech</label>
-    <label style="margin-left: 20px;"><input type="checkbox" id="errorlessToggle" /> Errorless mode</label>
-  </div>
+  <a href="https://www.talkinginpictures.co.uk">
+    <img src="https://www.talkinginpictures.co.uk/tip-logo.png" alt="Talking in Pictures Logo" height="80">
+  </a>
+  <h1>Reading Programme</h1>
 
   <div id="gameArea">
+    <p id="promptEl"></p>
+    <img id="imageEl" src="" alt="Prompt image"><br>
     <div class="word-display">
-      <div class="uppercase-word"></div>
-      <div class="lowercase-word"></div>
+      <strong id="wordUpper"></strong><br>
+      <em id="wordLower"></em>
     </div>
-    <div class="initial-letter" id="initialLetter"></div>
-    <img id="image" src="" alt="Word image" />
-    <div class="prompt" id="prompt">&nbsp;</div>
-    <input type="text" id="answer" maxlength="20" autofocus autocomplete="off" />
-    <div class="feedback" id="feedback"></div>
-    <div class="symbol-output" id="symbol"></div>
-    <div id="timerDisplay">Time this round: 0s</div>
+    <div id="initialLetter"></div>
+    <input id="answerEl" type="text" autocomplete="off"><br>
+    <p id="feedbackEl"></p>
+    <p id="symbolEl"></p>
   </div>
 
-  <div id="congratsScreen">
-    <h1>🎉 Congratulations! You've finished the round!</h1>
+  <div id="congratsScreen" class="hidden">
+    <p class="congrats">🎉 Congratulations! You completed the round!</p>
     <div id="summaryTable"></div>
+    <p id="summaryAttempts"></p>
+    <p id="summaryCorrect"></p>
+    <p id="summaryAccuracy"></p>
+    <p id="summaryTime"></p>
     <button onclick="startNextRound()">Start Next Round</button>
   </div>
 
-  <!-- Script block continues -->
   <script>
-    const fourLetterWords = ["frog", "milk", "ship", "book", "lamp", "star", "duck", "nest", "ball", "tree"];
-    const fiveLetterWords = ["apple", "chair", "grape", "plant", "train", "snake", "cloud", "light", "brick", "smile"];
-    const sixLetterWords = ["rabbit", "guitar", "button", "silver", "orange", "bridge", "castle", "pencil", "market", "forest"];
-    const sevenLetterWords = ["picture", "teacher", "blanket", "student", "printer", "glasses", "balloon", "sandbox", "cabinet", "monster"];
-    const eightLetterWords = ["elephant", "sandwich", "umbrella", "dinosaur", "notebook", "hospital", "football", "building", "magazine", "airplane"];
-    const nineLetterWords = ["chocolate", "pineapple", "volunteer", "nightmare", "storybook", "blueberry", "astronaut", "adventure", "campfire", "lighthouse"];
-    const tenLetterWords = ["strawberry", "vegetables", "playground", "motorcycle", "backpacker", "watermelon", "newspaper", "telescope", "librarian", "toothbrush"];
-    const elevenLetterWords = ["playfulness", "multiverse", "volleyballs", "breathtaking", "sailboarding", "friendliest", "expressions", "magnificent", "photographs", "windbreaker"];
-    const twelveLetterWords = ["understanding", "grandparents", "championship", "relationship", "kindergarten", "astonishment", "extraordinar", "intelligentl", "mathematical", "adventurous"];
-    const thirteenLetterWords = ["accomplishing", "contribution", "transformation", "concentration", "determination", "exaggeration", "hallucination", "justification", "participation", "recommendatio"];
-    const fourteenLetterWords = ["unbelievablely", "congratulation", "responsibility", "representation", "acknowledgment", "communication", "interpretation", "investigation", "manufacturing", "qualification"];
-    const fifteenLetterWords = ["extraordinarily", "misunderstoodly", "confidentiality", "unquestionably", "institutionally", "accomplishments", "unpredictablity", "comprehensively", "disappointmently", "uncontrollably"];
+// === INITIAL VARIABLES ===
+let phase = "alphabet";
+let round = 1;
+let current = 0;
+let correctCount = 0;
+let totalCount = 0;
+let startTime = Date.now();
+let errorlessMode = false;
+let speechOn = true;
+let allProgress = [];
 
-    const imageEl = document.getElementById("image");
-    const feedbackEl = document.getElementById("feedback");
-    const answerEl = document.getElementById("answer");
-    const symbolEl = document.getElementById("symbol");
-    const uppercaseEl = document.querySelector(".uppercase-word");
-    const lowercaseEl = document.querySelector(".lowercase-word");
-    const initialEl = document.getElementById("initialLetter");
-    const promptEl = document.getElementById("prompt");
-    const gameArea = document.getElementById("gameArea");
-    const congratsScreen = document.getElementById("congratsScreen");
-    const summaryTable = document.getElementById("summaryTable");
-    const speechToggle = document.getElementById("speechToggle");
-    const errorlessToggle = document.getElementById("errorlessToggle");
-    const timerDisplay = document.getElementById("timerDisplay");
+const promptEl = document.getElementById("promptEl");
+const wordUpper = document.getElementById("wordUpper");
+const wordLower = document.getElementById("wordLower");
+const initialLetter = document.getElementById("initialLetter");
+const answerEl = document.getElementById("answerEl");
+const feedbackEl = document.getElementById("feedbackEl");
+const symbolEl = document.getElementById("symbolEl");
+const imageEl = document.getElementById("imageEl");
+const gameArea = document.getElementById("gameArea");
+const congratsScreen = document.getElementById("congratsScreen");
+const summaryTable = document.getElementById("summaryTable");
+const summaryAttempts = document.getElementById("summaryAttempts");
+const summaryCorrect = document.getElementById("summaryCorrect");
+const summaryAccuracy = document.getElementById("summaryAccuracy");
+const summaryTime = document.getElementById("summaryTime");
 
-    let validWordList = [];
-    let current = 0;
-    let round = 1;
-    let correctCount = 0;
-    let totalCount = 0;
-    let startTime = 0;
-    let phase = "alphabet";
-    let allProgress = [];
-    let timerInterval;
+const wordSets = {
+  1: ["apple", "dog", "ball", "car", "fish", "egg", "goat", "hat", "ice", "jug", "kite", "lion", "moon", "net", "owl", "pen", "queen", "rat", "sun", "top", "urn", "van", "web", "xray", "yak", "zebra"],
+  2: ["ant", "bat", "cup", "dig", "ear", "fan", "gum", "hop", "ink", "jam", "kid", "log", "man", "nap", "oil", "pit", "quip", "rug", "sip", "tip", "use", "vet", "wig", "box", "yarn", "zip"],
+  3: ["frog", "milk", "ship", "book", "lamp", "star", "duck", "nest", "ball", "tree"],
+  4: ["apple", "chair", "grape", "plant", "train", "snake", "cloud", "light", "brick", "smile"],
+  5: ["rabbit", "guitar", "button", "silver", "orange", "bridge", "castle", "pencil", "market", "forest"],
+  6: ["picture", "teacher", "blanket", "student", "printer", "glasses", "balloon", "sandbox", "cabinet", "monster"],
+  7: ["elephant", "sandwich", "umbrella", "dinosaur", "notebook", "hospital", "football", "building", "magazine", "airplane"],
+  8: ["chocolate", "pineapple", "volunteer", "nightmare", "storybook", "blueberry", "astronaut", "adventure", "campfire", "lighthouse"],
+  9: ["strawberry", "vegetables", "playground", "motorcycle", "backpacker", "watermelon", "newspaper", "telescope", "librarian", "toothbrush"],
+  10: ["playfulness", "multiverse", "volleyballs", "breathtaking", "sailboarding", "friendliest", "expressions", "magnificent", "photographs", "windbreaker"]
+};
 
-    function speakPrompt(text) {
-      if (!speechToggle.checked) return;
-      const utterance = new SpeechSynthesisUtterance(text);
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(utterance);
-    }
+let currentSet = [];
 
-    function updateDisplays(word, incorrect = false) {
-      uppercaseEl.textContent = word.toUpperCase();
-      lowercaseEl.textContent = word.toLowerCase();
-      initialEl.textContent = word[0].toUpperCase();
-      initialEl.className = incorrect ? "initial-letter incorrect" : "initial-letter";
-    }
+function speakPrompt(text) {
+  if (!speechOn) return;
+  const utter = new SpeechSynthesisUtterance(text);
+  speechSynthesis.speak(utter);
+}
 
-    function updateSummary() {
-      const acc = totalCount ? Math.round((correctCount / totalCount) * 100) : 0;
-      const elapsed = Math.floor((Date.now() - startTime) / 1000);
-      allProgress.push({ round, phase, correct: correctCount, total: totalCount, time: elapsed });
-    }
+function updateDisplays(word) {
+  wordUpper.textContent = word.toUpperCase();
+  wordLower.textContent = word.toLowerCase();
+  initialLetter.textContent = phase === "alphabet" ? word[0].toUpperCase() : "";
+  initialLetter.style.color = "black";
+}
 
-    function showSummaryTable() {
-      summaryTable.innerHTML = '<h3>Progress Summary</h3>' +
-        allProgress.map(r => `<p><strong>Round ${r.round} (${r.phase})</strong><br>
-        Score: ${r.correct}/${r.total} | Accuracy: ${Math.round((r.correct / r.total) * 100)}% | Time: ${r.time}s</p>`).join('');
-    }
+function preload(set) {
+  currentSet = set;
+  current = 0;
+  startTime = Date.now();
+  loadWord(current);
+}
 
-    function updateTimerDisplay() {
-      const seconds = Math.floor((Date.now() - startTime) / 1000);
-      timerDisplay.textContent = `Time this round: ${seconds}s`;
-    }
+function updateSummary() {
+  const acc = totalCount ? Math.round((correctCount / totalCount) * 100) : 0;
+  const elapsed = Math.floor((Date.now() - startTime) / 1000);
+  summaryAttempts.textContent = `Total Attempts: ${totalCount}`;
+  summaryCorrect.textContent = `Correct Answers: ${correctCount}`;
+  summaryAccuracy.textContent = `Accuracy: ${acc}%`;
+  summaryTime.textContent = `Round Time: ${elapsed}s`;
+  allProgress.push({ round, phase, correct: correctCount, total: totalCount, time: elapsed });
+}
 
-    function startTimerLoop() {
-      clearInterval(timerInterval);
-      timerInterval = setInterval(updateTimerDisplay, 1000);
-    }
+function showSummaryTable() {
+  summaryTable.innerHTML = '<h3>Progress Summary</h3>' +
+    allProgress.map(r => `<p><strong>Round ${r.round} (${r.phase})</strong><br>Score: ${r.correct}/${r.total} | Accuracy: ${Math.round((r.correct / r.total) * 100)}% | Time: ${r.time}s</p>`).join('');
+}
 
-    async function fetchARASAAC(word) {
-      const url = `https://api.arasaac.org/api/pictograms/en/search/${encodeURIComponent(word)}`;
-      try {
-        const res = await fetch(url);
-        const data = await res.json();
-        if (data.length) return `https://static.arasaac.org/pictograms/${data[0]._id}/${data[0]._id}_300.png`;
-      } catch {}
-      return "";
-    }
+function startNextRound() {
+  round++;
+  if (!wordSets[round]) {
+    alert("🎉 All rounds complete!");
+    return;
+  }
+  phase = `round${round}`;
+  correctCount = 0;
+  totalCount = 0;
+  gameArea.style.display = 'block';
+  congratsScreen.classList.add("hidden");
+  preload(wordSets[round]);
+}
 
-    async function preload(words, mode) {
-      validWordList = [];
-      for (const word of words) {
-        const image = await fetchARASAAC(word);
-        validWordList.push({ word, letter: word[0], image });
-      }
-      startTime = Date.now();
-      startTimerLoop();
-      loadWord(0);
-    }
+function loadWord(index) {
+  if (index >= currentSet.length || index >= 10) {
+    gameArea.style.display = 'none';
+    congratsScreen.classList.remove("hidden");
+    updateSummary();
+    showSummaryTable();
+    return;
+  }
+  const word = currentSet[index];
+  const imageURL = `https://static.arasaac.org/pictograms/${word}.png`;
+  updateDisplays(word);
+  imageEl.src = imageURL;
+  imageEl.onerror = () => imageEl.src = "https://via.placeholder.com/150?text=Image";
+  feedbackEl.textContent = "";
+  symbolEl.textContent = "";
+  promptEl.textContent = phase === "alphabet" ? `What letter does ${word.toUpperCase()} begin with?` : `Type the word: ${word}`;
+  const speechText = phase === "alphabet" ? `What letter does ${word} begin with?` : `Type the word ${word}`;
+  speakPrompt(speechText);
+  answerEl.value = "";
+}
 
-    function loadWord(index) {
-      if (index >= 10 || index >= validWordList.length) {
-        gameArea.style.display = 'none';
-        congratsScreen.style.display = 'block';
-        updateSummary();
-        showSummaryTable();
-        return;
-      }
-      const entry = validWordList[index];
-      updateDisplays(entry.word);
-      imageEl.src = entry.image;
-      feedbackEl.textContent = "";
-      symbolEl.textContent = "";
-      promptEl.textContent = phase === "alphabet" ? `What letter does ${entry.word.toUpperCase()} begin with?` : `Type the word:`;
-      answerEl.value = "";
-      speakPrompt(promptEl.textContent);
-    }
-
-    answerEl.addEventListener("input", () => {
-      const entry = validWordList[current];
-      const typed = answerEl.value.toLowerCase();
-
-      if (errorlessToggle.checked) {
-        if ((phase === "alphabet" && typed !== entry.letter) || (phase !== "alphabet" && typed !== entry.word.slice(0, typed.length))) {
-          answerEl.value = typed.slice(0, typed.length - 1);
-          return;
-        }
-      }
-
-      if ((phase === "alphabet" && typed === entry.letter) || (phase !== "alphabet" && typed === entry.word)) {
+answerEl.addEventListener("input", () => {
+  const word = currentSet[current];
+  const val = answerEl.value.toLowerCase();
+  if (errorlessMode && phase !== "alphabet" && val !== word.slice(0, val.length)) {
+    answerEl.value = val.slice(0, -1);
+    return;
+  }
+  if (phase === "alphabet") {
+    if (val.length === 1) {
+      totalCount++;
+      if (val === word[0].toLowerCase()) {
         correctCount++;
-        totalCount++;
-        feedbackEl.textContent = "✅ Well done!";
-        symbolEl.textContent = entry.word + " = ✅";
-        setTimeout(() => {
-          current++;
-          loadWord(current);
-        }, 1500);
-      } else if (typed.length === (phase === "alphabet" ? 1 : entry.word.length)) {
-        totalCount++;
+        feedbackEl.textContent = "✅ Correct!";
+        symbolEl.textContent = `🍎 = ${word}`;
+        setTimeout(() => loadWord(++current), 1000);
+      } else {
         feedbackEl.textContent = "❌ Try again";
-        updateDisplays(entry.word, true);
-      } else {
-        feedbackEl.textContent = "";
-        updateDisplays(entry.word);
-      }
-    });
-
-    function startNextRound() {
-      round++;
-      current = 0;
-      correctCount = 0;
-      totalCount = 0;
-      gameArea.style.display = 'block';
-      congratsScreen.style.display = 'none';
-
-      const roundData = {
-        2: { phase: "threeLetter", words: ["cat", "dog", "sun", "pen", "cup", "box", "man", "fan", "bag", "jam"] },
-        3: { phase: "fourLetter", words: fourLetterWords },
-        4: { phase: "fiveLetter", words: fiveLetterWords },
-        5: { phase: "sixLetter", words: sixLetterWords },
-        6: { phase: "sevenLetter", words: sevenLetterWords },
-        7: { phase: "eightLetter", words: eightLetterWords },
-        8: { phase: "nineLetter", words: nineLetterWords },
-        9: { phase: "tenLetter", words: tenLetterWords },
-        10: { phase: "elevenLetter", words: elevenLetterWords },
-        11: { phase: "twelveLetter", words: twelveLetterWords },
-        12: { phase: "thirteenLetter", words: thirteenLetterWords },
-        13: { phase: "fourteenLetter", words: fourteenLetterWords },
-        14: { phase: "fifteenLetter", words: fifteenLetterWords },
-        15: { phase: "easyReview", words: fourLetterWords },
-        16: { phase: "mediumReview", words: sixLetterWords },
-        17: { phase: "hardReview", words: tenLetterWords },
-        18: { phase: "extremeReview", words: elevenLetterWords },
-        19: { phase: "finalChallenge", words: thirteenLetterWords },
-        20: { phase: "grandFinale", words: fifteenLetterWords },
-      };
-
-      if (roundData[round]) {
-        const { phase: newPhase, words } = roundData[round];
-        phase = newPhase;
-        preload(words, newPhase);
-      } else {
-        alert("🎉 Well done! You've completed all 20 rounds!");
+        initialLetter.style.color = "red";
       }
     }
+  } else {
+    if (val === word) {
+      totalCount++;
+      correctCount++;
+      feedbackEl.textContent = "✅ Great job!";
+      symbolEl.textContent = `🎉 ${word.toUpperCase()}!`;
+      setTimeout(() => loadWord(++current), 1000);
+    }
+  }
+});
 
-    // Start with double alphabet round
-    const alphabetWords = [..."abcdefghijklmnopqrstuvwxyz"].map((l, i) => ({
-      word: [
-        "apple","ball","cat","dog","egg","fish","goat","hat","ice","juice",
-        "kite","lion","moon","nest","orange","pig","queen","rain","sun","tree",
-        "umbrella","van","whale","xylophone","yarn","zebra"
-      ][i],
-      letter: l
-    }));
-    preload([...alphabetWords, ...alphabetWords].map(w => w.word), 'alphabet');
+// Initial start
+preload(wordSets[1]);
   </script>
+
 </body>
 </html>
+
